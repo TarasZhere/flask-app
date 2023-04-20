@@ -34,6 +34,7 @@ def add_item(): # this is the counterpart of add_entry() from homework 3
 def update_item(item): # this is the counterpart of mark_as_done() from homework 3
     db = get_db()
     response = None
+    print(item)
     
     if request.method == 'PUT':
         try:
