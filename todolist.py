@@ -8,7 +8,6 @@ app = Flask(__name__)
 # for example, like this: TODO_API_URL = "http://123.456.789.123:5001"
 TODO_API_URL = "http://34.122.186.22:80"
 
-
 @app.route("/")
 def show_list(): # this is the counterpart of show_list() from homework 3
     resp = requests.get(TODO_API_URL+"/api/items")
