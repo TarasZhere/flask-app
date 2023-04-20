@@ -6,7 +6,7 @@ import requests , sys
 app = Flask(__name__)
 # make sure to replace localhost with the actual IP of the backend service after you deploy the backend service on Google Cloud
 # for example, like this: TODO_API_URL = "http://123.456.789.123:5001"
-TODO_API_URL = "http://34.122.186.22:80"
+TODO_API_URL = "http://34.122.186.22"
 
 @app.route("/")
 def show_list(): # this is the counterpart of show_list() from homework 3
@@ -26,7 +26,7 @@ def add_entry(): # this is the counterpart of add_entry() from homework 3
 def delete_entry(item): # this is the counterpart of delete_entry(...) from homework 3
     item = urllib.parse.quote(item) # this takes care of spaces in the item
     try:
-        requests.delete(f"{TODO_API_URL}/api/item/{str(item)}")
+        requests.delete(f"{TODO_API_URL}/api/item/{item}")
     except:
         print('ERROR: Something went wrong inside the server')
 

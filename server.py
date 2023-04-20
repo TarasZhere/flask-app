@@ -38,7 +38,7 @@ def update_item(item): # this is the counterpart of mark_as_done() from homework
     
     if request.method == 'PUT':
         try:
-            db.execute(f"UPDATE entries SET status='done' WHERE what_to_do='{urllib.parse.quote(item)}'")
+            db.execute(f"UPDATE entries SET status='done' WHERE what_to_do='{item}'")
             db.commit()
             response = Response(response="<h2>Success</h2>", status=200)
         except:
