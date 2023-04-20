@@ -1,7 +1,6 @@
 # RESTful API
 from flask import Flask, g, request, jsonify, Response, make_response
 import sqlite3
-import urllib
 import json
 
 DATABASE = 'todolist.db'
