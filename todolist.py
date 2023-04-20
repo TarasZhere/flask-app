@@ -1,63 +1,43 @@
 # This is a simple example web app that is meant to illustrate the basics.
-from flask import Flask, render_template, redirect, g, request, url_for
-import sqlite3
-
-DATABASE = 'todolist.db'
+from flask import Flask, render_template, redirect, g, request, url_for, jsonify, json
+import urllib
+import requests , sys
 
 app = Flask(__name__)
-app.config.from_object(__name__)
+# make sure to replace localhost with the actual IP of the backend service after you deploy the backend service on Google Cloud
+# for example, like this: TODO_API_URL = "http://123.456.789.123:5001"
+TODO_API_URL = "http://localhost:5000"
 
 
 @app.route("/")
-def show_list():
-    db = get_db()
-    cur = db.execute('SELECT what_to_do, due_date, status FROM entries')
-    entries = cur.fetchall()
-    tdlist = [dict(what_to_do=row[0], due_date=row[1], status=row[2])
-              for row in entries]
-    return render_template('index.html', todolist=tdlist)
+def show_list(): # this is the counterpart of show_list() from homework 3
+    resp = requests.get(TODO_API_URL+"/api/items")
+    resp = resp.json()
+    return render_template('index.html', todolist=resp)
 
 
 @app.route("/add", methods=['POST'])
-def add_entry():
-    db = get_db()
-    db.execute('insert into entries (what_to_do, due_date) values (?, ?)',
-               [request.form['what_to_do'], request.form['due_date']])
-    db.commit()
+def add_entry(): # this is the counterpart of add_entry() from homework 3
+    requests.post(TODO_API_URL+"/api/items", json={
+                  "what_to_do": request.form['what_to_do'], "due_date": request.form['due_date']})
     return redirect(url_for('show_list'))
 
 
 @app.route("/delete/<item>")
-def delete_entry(item):
-    db = get_db()
-    db.execute("DELETE FROM entries WHERE what_to_do='"+item+"'")
-    db.commit()
-    return redirect(url_for('show_list'))
+def delete_entry(item): # this is the counterpart of delete_entry(...) from homework 3
+    item = urllib.parse.quote(item) # this takes care of spaces in the item
+    try:
+        requests.delete(f"{TODO_API_URL}/api/item/{str(item)}")
+    except:
+        print('ERROR: Something went wrong inside the server')
 
+    return redirect(url_for('show_list'))
 
 @app.route("/mark/<item>")
-def mark_as_done(item):
-    db = get_db()
-    db.execute("UPDATE entries SET status='done' WHERE what_to_do='"+item+"'")
-    db.commit()
+def mark_as_done(item): 
+    try:
+        requests.put(f"{TODO_API_URL}/api/item/{str(item)}")
+    except:
+        print('ERROR: Something went wrong inside the server')
+
     return redirect(url_for('show_list'))
-
-
-def get_db():
-    """Opens a new database connection if there is none yet for the
-    current application context.
-    """
-    if not hasattr(g, 'sqlite_db'):
-        g.sqlite_db = sqlite3.connect(app.config['DATABASE'])
-    return g.sqlite_db
-
-
-@app.teardown_appcontext
-def close_db(error):
-    """Closes the database again at the end of the request."""
-    if hasattr(g, 'sqlite_db'):
-        g.sqlite_db.close()
-
-
-if __name__ == "__main__":
-    app.run("0.0.0.0", port=80)
